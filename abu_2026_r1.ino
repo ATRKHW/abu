@@ -32,8 +32,9 @@ void setup() {
   for (int i = 0; i < 4; i++) {
     pinMode(motorPins[i][0], OUTPUT);
     pinMode(motorPins[i][1], OUTPUT);
-    ledcSetup(i, 5000, 8);
-    ledcAttachPin(motorPins[i][2], i);
+    // ledcSetup(i, 5000, 8);
+    // ledcAttachPin(motorPins[i][2], i);
+    ledcAttach(motorPins[i][2], 5000, 8);
   }
   // อนุญาตให้ใช้ Timer สำหรับ PWM
   ESP32PWM::allocateTimer(3);
@@ -49,14 +50,14 @@ void setup() {
 void moveMotor(int index, bool direction, int speed) {
   digitalWrite(motorPins[index][0], direction ? HIGH : LOW);
   digitalWrite(motorPins[index][1], direction ? LOW : HIGH);
-  ledcWrite(index, speed);
+  ledcWrite(motorPins[index][2], speed);
 }
 
 void stopAllMotors() {
   for (int i = 0; i < 4; i++) {
     digitalWrite(motorPins[i][0], LOW);
     digitalWrite(motorPins[i][1], LOW);
-    ledcWrite(i, 0);
+    ledcWrite(motorPins[i][2], 0);
   }
 }
 
@@ -117,7 +118,7 @@ void loop() {
     } else if (ps5.Square()) {
       SerialPort.println("Square");
       delay(900);
-      myServo.write(25);
+      myServo.write(150);
       lastActionTime = now;
     } else if (ps5.Triangle()) {
       SerialPort.println("Triangle");
@@ -127,6 +128,9 @@ void loop() {
       lastActionTime = now;
     } else if (ps5.R1()) {
       SerialPort.println("Drop");
+      lastActionTime = now;
+    } else if (ps5.R2()) {
+      SerialPort.println("Release");
       lastActionTime = now;
     }
   }
@@ -146,7 +150,7 @@ void loop() {
     strafeRight();
   } else if (ps5.LStickY() > 100) {
     SerialPort.println("M");
-  } else if (ps5.LStickY() <- 100) {
+  } else if (ps5.LStickY() < -100) {
     SerialPort.println("W");
   } else if (ps5.RStickX() > 100) {
     // Serial.printf("Rotate Right: %d\n", ps5.LStickX());
@@ -154,6 +158,8 @@ void loop() {
   } else if (ps5.RStickX() < -100) {
     // Serial.printf("Rotate Left: %d\n", ps5.LStickX());
     rotateLeft();
+  } else if (ps5.L1()) {
+    SerialPort.println("O");
   } else {
     stopAllMotors();
     SerialPort.println("X");
