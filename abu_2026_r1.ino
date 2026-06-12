@@ -132,6 +132,13 @@ void loop() {
     } else if (ps5.R2()) {
       SerialPort.println("Release");
       lastActionTime = now;
+    } else if (ps5.Cross()) {
+      if (myServo.read() == 90) {
+        myServo.write(150);
+      } else {
+        myServo.write(90);
+      }
+      lastActionTime = now;
     }
   }
 
